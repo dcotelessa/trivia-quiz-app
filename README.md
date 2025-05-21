@@ -38,31 +38,23 @@ This architecture provides several benefits:
 - TypeScript - type safety
 - Docker
 
-### Frontend (coming soon)
+### Frontend (Web)
+
 - React with TypeScript
 - Redux with Redux Toolkit
-- CSS
+- Component-based architecture
 
 ## Getting Started
 
 ### Prerequisites
-- Docker and Docker Compose
-- Node.js (if running locally)
-- pnpm (preferred package manager)
-
-### Package Management
-
-This project uses pnpm as the package manager. If you don't have pnpm installed, you can install it with:
-
-```bash
-npm install -g pnpm
-```
+- Docker and Docker Compose (for containerized deployment)
+- Node.js v18+ and pnpm (for local development)
 
 ### Running with Docker
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/dcotelessa/trivia-quiz-app.git
    cd trivia-quiz-app
    ```
 
@@ -71,52 +63,33 @@ npm install -g pnpm
    docker-compose up
    ```
 
-3. Seed the database:
-   ```
-   docker exec -it trivia-backend pnpm run seed
-   ```
+   This will:
+   - Start MongoDB container
+   - Build and start the backend container
+   - Run the database seeding process automatically on first startup (this takes time due to rate limiting)
 
-4. The backend API will be available at http://localhost:3001
 
-### Local Development Setup
+3. Access the application:
+- Backend API: http://localhost:3001
+- Test the API: http://localhost:3001/api/categories
 
-If you prefer to run the application locally:
+4. To stop the application:
+```
+docker-compose down
+```
 
-1. Install dependencies:
-   ```
-   cd backend
-   pnpm install
-   ```
-
-2. Set up environment variables:
-   ```
-   # Create a .env.local file for your local development
-   cp .env.example .env.local
-   
-   # Edit the file to match your local environment
-   # This file won't be committed to git
-   ```
-
-3. Start MongoDB (via Docker or locally)
-
-4. Run the development server:
-   ```
-   pnpm run dev
-   ```
-
-5. Seed the database:
-   ```
-   pnpm run seed
-   ```
+If we want to remove all seeded data:
+```
+docker-compose down -v
+```
 
 ### Testing
 
 This project prioritizes unit tests for local development to keep the testing process fast.
 
-#### Unit Tests (Default)
+#### Unit Tests
 
-Run the unit tests (excludes integration tests that require a database):
-
+Run the unit tests locally (fast, no database dependency):
 ```bash
 pnpm test
 ```
@@ -128,40 +101,6 @@ Get code coverage for all unit tests:
 ```bash
 pnpm test:coverage
 ```
-
-#### Integration Tests
-
-Set up a test database and run integration tests:
-
-```bash
-# Start a MongoDB container for testing
-pnpm test:setup
-
-# Run the integration tests
-pnpm test:integration
-
-# Clean up when finished
-pnpm test:teardown
-```
-
-#### Testing Configuration
-
-You can configure the test database connection by adding to your `.env.local`:
-
-```
-TEST_MONGODB_URI=mongodb://localhost:27017/trivia-test
-```
-
-#### All Tests
-
-Run all tests (both unit and integration):
-
-```bash
-pnpm test:all
-```
-
-For more details on testing, see [TESTING.md](./TESTING.md).
-
 ### API Endpoints
 
 #### Categories
@@ -171,23 +110,6 @@ For more details on testing, see [TESTING.md](./TESTING.md).
 #### Quiz
 - `GET /api/quiz?category=9&difficulty=easy&amount=5` - Get quiz questions
 - `POST /api/quiz/score` - Score a quiz submission
-
-## Project Structure
-
-```
-src/
-├── config/         # Application configuration
-├── models/         # Data structures and types
-├── repositories/   # Data access layer
-├── services/       # Business logic layer
-├── routes/         # API endpoints
-├── utils/          # Helper utilities
-├── app.ts          # Application setup
-└── server.ts       # Server entry point
-```
-
-## License
-This project is for demonstration purposes only.
 
 ## Credits
 - Question data sourced from the Open Trivia Database (https://opentdb.com)
