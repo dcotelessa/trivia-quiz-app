@@ -6,6 +6,7 @@ import { Question } from '../src/models/question';
 
 const CATEGORIES_API = 'https://opentdb.com/api_category.php';
 const QUESTIONS_API = 'https://opentdb.com/api.php';
+const RATE_LIMIT_DELAY = 5000; // 5 seconds between requests
 
 // OpenTDB API responses types
 interface OpenTDBCategoryResponse {
@@ -23,6 +24,12 @@ interface OpenTDBQuestionResponse {
     incorrect_answers: string[];
   }>;
 }
+
+/**
+ * Sleep helper function
+ * @param ms Milliseconds to sleep
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Fetch and seed categories from the API
@@ -67,13 +74,17 @@ const seedQuestions = async (categories: Category[]): Promise<void> => {
     let totalQuestionsSeeded = 0;
 
     console.log('Fetching questions from OpenTDB API...');
+    console.log(`Using a ${RATE_LIMIT_DELAY/1000}-second delay between requests to respect rate limits...`);
     
-    // Fetch questions for each category and difficulty
+    // Process categories one at a time
     for (const category of categories) {
+      console.log(`\nProcessing category: ${category.name} (ID: ${category.id})`);
+      
       for (const difficulty of difficulties) {
         try {
-          // Let's add a small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Respect the rate limit with a consistent 5-second delay
+          console.log(`Waiting ${RATE_LIMIT_DELAY/1000} seconds before fetching ${difficulty} questions for "${category.name}"...`);
+          await sleep(RATE_LIMIT_DELAY);
           
           const url = new URL(QUESTIONS_API);
           url.searchParams.append('amount', questionsPerBatch.toString());
@@ -81,7 +92,15 @@ const seedQuestions = async (categories: Category[]): Promise<void> => {
           url.searchParams.append('difficulty', difficulty);
           url.searchParams.append('type', 'multiple');
           
+          console.log(`Fetching ${difficulty} questions for "${category.name}"...`);
           const response = await fetch(url.toString());
+          
+          if (response.status === 429) {
+            console.log(`Rate limited (429) when fetching "${category.name}" (${difficulty}). Waiting 15 seconds before continuing...`);
+            await sleep(15000); // Wait longer if we hit a rate limit
+            console.log(`Skipping "${category.name}" (${difficulty}) for now and continuing with next...`);
+            continue;
+          }
           
           if (!response.ok) {
             console.warn(`Failed to fetch questions for category ${category.name} (${difficulty}): ${response.status} ${response.statusText}`);
@@ -103,19 +122,26 @@ const seedQuestions = async (categories: Category[]): Promise<void> => {
 
             await questionRepository.createMany(questions);
             totalQuestionsSeeded += questions.length;
-            console.log(`Added ${questions.length} questions for category "${category.name}" with ${difficulty} difficulty`);
+            console.log(`✓ Added ${questions.length} ${difficulty} questions for "${category.name}"`);
           } else {
-            console.log(`No questions available for category "${category.name}" with ${difficulty} difficulty`);
+            console.log(`✗ No ${difficulty} questions available for "${category.name}"`);
           }
         } catch (error) {
           const err = error as Error;
-          console.error(`Error fetching questions for category ${category.name} (${difficulty}):`, err.message);
-          // Continue with the next category/difficulty even if one fails
+          console.error(`Error fetching ${difficulty} questions for category ${category.name}:`, err.message);
+          // Continue with the next difficulty, but wait a bit longer
+          await sleep(5000);
         }
       }
+      
+      // Add a small status update after each category
+      console.log(`Completed category: ${category.name}. Progress: ${totalQuestionsSeeded} questions seeded so far.`);
     }
 
-    console.log(`Total of ${totalQuestionsSeeded} questions seeded successfully`);
+    console.log(`\n=======================================`);
+    console.log(`✓ Database seeding complete!`);
+    console.log(`✓ Total of ${totalQuestionsSeeded} questions seeded successfully`);
+    console.log(`=======================================`);
   } catch (error) {
     console.error('Error seeding questions:', error);
     throw error;
@@ -125,19 +151,28 @@ const seedQuestions = async (categories: Category[]): Promise<void> => {
 /**
  * Main seed function
  */
-const seedDatabase = async (): Promise<void> => {
+export const seedDatabase = async (): Promise<void> => {
   try {
     await connectDB();
+    console.log('Connected to database. Starting seed process...');
+    
     const categories = await seedCategories();
+    console.log('\nStarting to seed questions...');
     await seedQuestions(categories);
     
     console.log('Database seeded successfully');
-    process.exit(0);
   } catch (error) {
     console.error('Failed to seed database:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-// Run the seed function
-seedDatabase();
+// Only run if called directly (not imported)
+if (require.main === module) {
+  seedDatabase()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+}

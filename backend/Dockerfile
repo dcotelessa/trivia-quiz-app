@@ -12,27 +12,22 @@ COPY package.json pnpm-lock.yaml ./
 # Install dependencies
 RUN pnpm install
 
-# Copy source code and TypeScript config
+# Copy source code and configs
+COPY tsconfig*.json ./
+COPY .env* ./
 COPY src/ ./src/
-COPY tsconfig.json ./
-
-# Build TypeScript code
-RUN pnpm build
-
-# Verify the output directory structure
-RUN ls -la dist/
-
-# Copy scripts directory (if needed)
 COPY scripts/ ./scripts/
 
-# Set up environment
-COPY .env* ./
+# Copy and make the entrypoint script executable
+COPY docker-entrypoint.sh ./
+RUN chmod +x ./docker-entrypoint.sh
+
+# Build TypeScript code
+RUN pnpm build:all
 
 # Expose the port
 EXPOSE 3001
 
-# Compile both src and scripts
-RUN pnpm build:all
-
-# Start with the correct path
+# Use our custom entrypoint
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "dist/server.js"]

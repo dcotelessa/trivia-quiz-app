@@ -1,7 +1,5 @@
 node_modules
-src
-__tests__
-scripts
-jest.config.js
-jest.setup.js
-tsconfig.json
+dist
+dist-scripts
+coverage
+*.log
