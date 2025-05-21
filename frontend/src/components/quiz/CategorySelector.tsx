@@ -1,26 +1,34 @@
 import React from 'react';
 import { useCategories } from '../../hooks/useGraphQL';
-import Loader from '../ui/Loader';
-import ErrorMessage from '../ui/ErrorMessage';
+// Removed unused imports
 
 interface CategorySelectorProps {
   selectedCategory?: number;
   onChange: (categoryId: number | undefined) => void;
 }
 
-const CategorySelectorWithGraphQL: React.FC<CategorySelectorProps> = ({ selectedCategory, onChange }) => {
+const CategorySelector: React.FC<CategorySelectorProps> = ({ 
+  selectedCategory, 
+  onChange 
+}) => {
   const { loading, error, categories } = useCategories();
 
   if (loading) {
-    return <Loader />;
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <ErrorMessage message={error.message || 'Failed to load categories'} />;
+    return (
+      <div>
+        <div>Error</div>
+        <div>{error.message || 'Failed to load categories'}</div>
+      </div>
+    );
   }
 
   const handleSelectCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
+    // Safely convert to number or undefined
     onChange(value ? Number(value) : undefined);
   };
 
@@ -44,4 +52,4 @@ const CategorySelectorWithGraphQL: React.FC<CategorySelectorProps> = ({ selected
   );
 };
 
-export default CategorySelectorWithGraphQL;
+export default CategorySelector;
