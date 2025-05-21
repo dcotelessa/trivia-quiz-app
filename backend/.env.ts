@@ -1,3 +1,4 @@
+// backend/.env.ts (updated)
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,12 +16,6 @@ if (fs.existsSync(envLocalPath)) {
   // Otherwise load standard .env
   console.log('Loading environment from .env');
   dotenv.config({ path: envPath });
-}
-
-// Check for test environment
-if (process.env.NODE_ENV === 'test' && process.env.TEST_MONGODB_URI) {
-  console.log('Using test MongoDB URI');
-  process.env.MONGODB_URI = process.env.TEST_MONGODB_URI;
 }
 
 export default {

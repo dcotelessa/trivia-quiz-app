@@ -1,36 +1,18 @@
-// This is not a complete test; we're focusing on error handling in the seed script
-// We're not testing the full seeding process which would require mocking fetch and DB
-
 import categoryRepository from '../../src/repositories/categoryRepository';
 import questionRepository from '../../src/repositories/questionRepository';
-import connectDB from '../../src/config/db';
 import { QuestionType, QuestionDifficulty } from '../../src/models/question';
-
-// Mock dependencies
-jest.mock('../../src/config/db');
-jest.mock('../../src/repositories/categoryRepository');
-jest.mock('../../src/repositories/questionRepository');
-jest.mock('node:process', () => ({
-  ...jest.requireActual('node:process'),
-  exit: jest.fn()
-}));
 
 // Mock fetch to avoid actual API calls
 global.fetch = jest.fn() as jest.Mock;
 
 describe('Seed Script Functionality', () => {
-  // Simplified test of key functionality in the seed script
-  // We're checking the error handling and not the full seeding process
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   
   it('should handle API fetch errors when seeding categories', async () => {
-    // We need to import the seed function directly
-    // But to avoid running it immediately, we'll mock and test the key functions
-    
     // Mock fetch to simulate an API error
     (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('API error'));
-    
-    // Mock DB connection
-    (connectDB as jest.Mock).mockResolvedValueOnce({});
     
     // Create a mock of the seedCategories function
     const seedCategories = async () => {
@@ -46,46 +28,38 @@ describe('Seed Script Functionality', () => {
     await expect(seedCategories()).rejects.toThrow('API error');
   });
   
-  it('should handle database errors when deleting categories', async () => {
-    // Mock categoryRepository to simulate DB error
-    (categoryRepository.deleteAll as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+  it('should handle database operations with categories', async () => {
+    // Test category creation
+    await categoryRepository.createMany([
+      { id: 1, name: 'Test Category 1' },
+      { id: 2, name: 'Test Category 2' }
+    ]);
     
-    // Create a mock like what's in the seed script
-    const clearCategories = async () => {
-      try {
-        await categoryRepository.deleteAll();
-      } catch (error) {
-        console.error('Error clearing categories:', error);
-        throw error;
-      }
-    };
+    const categories = await categoryRepository.findAll();
+    expect(categories).toHaveLength(2);
     
-    await expect(clearCategories()).rejects.toThrow('DB error');
+    // Test category deletion
+    await categoryRepository.deleteAll();
+    const emptyCats = await categoryRepository.findAll();
+    expect(emptyCats).toHaveLength(0);
   });
   
-  it('should handle database errors when creating questions', async () => {
-    // Mock questionRepository to simulate DB error
-    (questionRepository.createMany as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-    
-    // Create a mock like what's in the seed script
-    const createQuestions = async () => {
-      try {
-        await questionRepository.createMany([
-          {
-            category: 9,
-            type: 'multiple' as QuestionType,
-            difficulty: 'easy' as QuestionDifficulty,
-            question: 'Test',
-            correct_answer: 'Test',
-            incorrect_answers: ['A', 'B', 'C']
-          }
-        ]);
-      } catch (error) {
-        console.error('Error creating questions:', error);
-        throw error;
+  it('should handle database operations with questions', async () => {
+    // Test question creation
+    await questionRepository.createMany([
+      {
+        category: 9,
+        type: 'multiple' as QuestionType,
+        difficulty: 'easy' as QuestionDifficulty,
+        question: 'Test question 1',
+        correct_answer: 'Correct',
+        incorrect_answers: ['Wrong 1', 'Wrong 2', 'Wrong 3']
       }
-    };
+    ]);
     
-    await expect(createQuestions()).rejects.toThrow('DB error');
+    // Test question deletion
+    await questionRepository.deleteAll();
+    const questions = await questionRepository.findRandom({ amount: 5 });
+    expect(questions).toHaveLength(0);
   });
 });

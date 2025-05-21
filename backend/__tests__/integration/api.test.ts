@@ -4,48 +4,35 @@ import { CategoryModel, QuestionModel } from '../../src/config/db';
 import { QuestionType, QuestionDifficulty } from '../../src/models/question';
 
 describe('API Integration Tests', () => {
-  let server: FastifyInstance | null = null;
+  let server: FastifyInstance;
 
   beforeAll(async () => {
-    try {
-      server = await createServer();
-      console.log('Server created successfully for tests');
-    } catch (error) {
-      console.error('Failed to create server for tests:', error);
-      // Continue with tests
-    }
+    server = await createServer();
   });
 
   beforeEach(async () => {
+    // Reset test data
+    await CategoryModel.deleteMany({});
+    await QuestionModel.deleteMany({});
+    
     // Seed test data
-    if (server) {
-      await CategoryModel.create({ id: 9, name: 'General Knowledge' });
-      await QuestionModel.create({
-        category: 9,
-        type: 'multiple' as QuestionType,
-        difficulty: 'easy' as QuestionDifficulty,
-        question: 'What is the capital of France?',
-        correct_answer: 'Paris',
-        incorrect_answers: ['London', 'Berlin', 'Madrid']
-      });
-    }
+    await CategoryModel.create({ id: 9, name: 'General Knowledge' });
+    await QuestionModel.create({
+      category: 9,
+      type: 'multiple' as QuestionType,
+      difficulty: 'easy' as QuestionDifficulty,
+      question: 'What is the capital of France?',
+      correct_answer: 'Paris',
+      incorrect_answers: ['London', 'Berlin', 'Madrid']
+    });
   });
 
   afterAll(async () => {
-    if (server) {
-      await server.close();
-      console.log('Server closed successfully');
-    }
+    await server.close();
   });
 
-  // Rest of your tests remain the same...
   describe('GET /api/categories', () => {
     it('should return all categories', async () => {
-      if (!server) {
-        console.log('Skipping test as server creation failed');
-        return;
-      }
-      
       const response = await server.inject({
         method: 'GET',
         url: '/api/categories'
@@ -60,5 +47,5 @@ describe('API Integration Tests', () => {
     });
   });
 
-  // Continue with other tests, adding the server null check at the beginning of each test...
+  // Add more integration tests here...
 });
