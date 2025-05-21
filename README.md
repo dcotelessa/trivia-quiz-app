@@ -68,6 +68,10 @@ This architecture provides several benefits:
    - Build and start the backend container
    - Run the database seeding process automatically on first startup (this takes time due to rate limiting)
 
+   If you update code, you may want to rebuild Docker images:
+   ```
+   docker-compose up --build
+   ```
 
 3. Access the application:
 - Backend API: http://localhost:3001
