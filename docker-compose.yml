@@ -1,6 +1,7 @@
 services:
   mongodb:
     image: mongo:6.0
+    container_name: trivia-mongodb
     ports:
       - "27017:27017"
     volumes:
@@ -12,11 +13,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - trivia-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: trivia-backend
     ports:
       - "3001:3001"
     depends_on:
@@ -27,6 +31,13 @@ services:
       - PORT=3001
       - MONGODB_URI=mongodb://mongodb:27017/trivia-quiz
     restart: on-failure
+    networks:
+      - trivia-network
+
+networks:
+  trivia-network:
+    name: trivia-network
 
 volumes:
   mongodb_data:
+    name: trivia-mongodb-data
