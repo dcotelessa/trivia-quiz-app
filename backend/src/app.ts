@@ -1,8 +1,11 @@
 import fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import mercurius from 'mercurius';
 import connectDB from './config/db';
 import categoryRoutes from './routes/categories';
 import quizRoutes from './routes/quiz';
+import schema from './graphql/schema';
+import resolvers from './graphql/resolvers';
 
 /**
  * Create and configure the Fastify server
@@ -19,13 +22,30 @@ export async function createServer(): Promise<FastifyInstance> {
     credentials: true
   });
 
-  // Register routes with prefixes, categories and quiz
+  // Register GraphQL
+  await server.register(mercurius, {
+    schema,
+    resolvers,
+    graphiql: true,  // Enable GraphiQL interface
+    path: '/graphql'
+  });
+
+  // Register REST routes with prefixes
   server.register(categoryRoutes, { prefix: '/api/categories' });
   server.register(quizRoutes, { prefix: '/api/quiz' });
 
   // Root route
   server.get('/', async (request, reply) => {
-    return { message: 'Welcome to Trivia Quiz API' };
+    return { 
+      message: 'Welcome to Trivia Quiz API',
+      endpoints: {
+        rest: {
+          categories: '/api/categories',
+          quiz: '/api/quiz'
+        },
+        graphql: '/graphql'
+      }
+    };
   });
 
   return server;

@@ -12,17 +12,21 @@ This is a fullstack Trivia Quiz app
 
 This application follows a **Clean Architecture with Service Layer** design, which provides a good balance of separation of concerns without unnecessary complexity:
 
-```
+### Backend Architecture:
 │    Routes   │────▶│   Services  │────▶│ Repositories │────▶│   Database  │
 
-```
+- **Routes Layer**: API endpoints that handle HTTP requests and responses
+- **Services Layer**: Business logic that orchestrates the application functionality
+- **Repositories Layer**: Data access abstraction that handles database operations
+- **Models**: Shared data structures and types used across layers
 
-### Architecture Layers:
+### Frontend Architecture:
+│    Pages    │────▶│  Components │────▶│ Redux Store │────▶│     API     │
 
-1. **Routes Layer**: API endpoints that handle HTTP requests and responses
-2. **Services Layer**: Business logic that orchestrates the application functionality
-3. **Repositories Layer**: Data access abstraction that handles database operations
-4. **Models**: Shared data structures and types used across layers
+- **Pages**: Top-level components that represent route destinations
+- **Components**: Reusable UI components
+- **Redux Store**: State management using Redux Toolkit
+- **API Services**: Handles communication with the backend
 
 This architecture provides several benefits:
 - Clear separation of concerns
@@ -43,6 +47,7 @@ This architecture provides several benefits:
 - React with TypeScript
 - Redux with Redux Toolkit
 - Component-based architecture
+- React Testing Library for unit tests
 
 ## Getting Started
 
@@ -114,6 +119,44 @@ pnpm test:coverage
 #### Quiz
 - `GET /api/quiz?category=9&difficulty=easy&amount=5` - Get quiz questions
 - `POST /api/quiz/score` - Score a quiz submission
+
+### GraphQL Endpoint
+
+The application also provides a GraphQL API at `/graphql` with the following operations:
+
+**Queries:**
+- `categories` - Get all categories
+- `category(id: Int!)` - Get a category by ID
+- `quiz(options: QuizOptionsInput)` - Get quiz questions
+
+**Mutations:**
+- `submitQuiz(answers: [QuizAnswerInput!]!)` - Submit and score a quiz
+
+A GraphQL interface is available at `/graphql` when running in development mode.
+
+Example GraphQL query:
+```graphql
+query {
+  categories {
+    id
+    name
+  }
+  
+  quiz(options: { category: 9, difficulty: MEDIUM, amount: 5 }) {
+    id
+    question
+    answers
+  }
+}
+```
+This GraphQL implementation provides an alternative way to interact with our Trivia Quiz API, offering the flexibility and efficiency benefits of GraphQL while maintaining the existing REST API for backward compatibility.
+
+The implementation follows best practices:
+1. Strong type definitions using GraphQL schema language
+2. Integration with existing services for reuse of business logic
+3. Apollo Client setup for the frontend with custom hooks
+4. Clear documentation in the README
+
 
 ## Credits
 - Question data sourced from the Open Trivia Database (https://opentdb.com)

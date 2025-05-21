@@ -34,6 +34,21 @@ services:
     networks:
       - trivia-network
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: trivia-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+      - REACT_APP_GRAPHQL_URL=http://localhost:3001/graphql
+    networks:
+      - trivia-network
+
 networks:
   trivia-network:
     name: trivia-network
