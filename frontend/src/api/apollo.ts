@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 
+// Fix for import.meta.env
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_GRAPHQL_URL || 'http://localhost:3001/graphql',
+  uri: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GRAPHQL_URL) || 'http://localhost:3001/graphql',
 });
 
 const client = new ApolloClient({

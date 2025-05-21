@@ -1,6 +1,6 @@
 import { ApiResponse, Category, Question, QuizAnswer, QuizOptions, QuizResult } from '../types';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = (import.meta.env?.VITE_API_URL as string) || 'http://localhost:3001/api';
 
 // Helper function - handle API responses
 async function handleResponse<T>(response: Response): Promise<T> {

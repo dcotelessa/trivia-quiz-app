@@ -38,6 +38,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "jsdom": "^23.0.1",
+    "testing": "link:@apollo/client/testing",
     "typescript": "^5.0.0",
     "vite": "^5.0.8",
     "vitest": "^1.0.4"

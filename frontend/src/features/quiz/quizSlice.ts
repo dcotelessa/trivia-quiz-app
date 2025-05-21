@@ -68,6 +68,11 @@ const quizSlice = createSlice({
       state.status = 'idle';
       state.error = null;
     },
+    setCurrentQuestion: (state, action: PayloadAction<number>) => {
+      if (action.payload >= 0 && action.payload < state.questions.length) {
+      	state.currentQuestion = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -94,6 +99,7 @@ export const {
   nextQuestion,
   previousQuestion,
   resetQuiz,
+  setCurrentQuestion,
 } = quizSlice.actions;
 
 export const selectQuizQuestions = (state: RootState) => state.quiz.questions;
