@@ -32,7 +32,7 @@ export async function createServer(): Promise<FastifyInstance> {
 }
 
 /**
- * Start the application
+ * Start the app
  * @returns Configured Fastify server
  */
 export async function startApp(): Promise<FastifyInstance> {
@@ -42,7 +42,7 @@ export async function startApp(): Promise<FastifyInstance> {
     
     return server;
   } catch (error) {
-    console.error('Failed to start the application:', error);
+    console.error('Failed to start the app:', error);
     process.exit(1);
   }
 }

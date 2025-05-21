@@ -1,31 +1,24 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm
+# Install pnpm globally
 RUN npm install -g pnpm
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
 RUN pnpm install
 
-# Copy the application code
+# Copy source code
 COPY . .
 
-# Make sure the build command works - debug by listing files
-RUN ls -la
-RUN cat package.json
-
-# Build the application
+# Build TypeScript code
 RUN pnpm build
 
-# Check if the build was successful
-RUN ls -la dist/
-
-# Expose the port
+# Expose the port your API runs on
 EXPOSE 3001
 
-# Start the application
+# Start the server
 CMD ["node", "dist/server.js"]
