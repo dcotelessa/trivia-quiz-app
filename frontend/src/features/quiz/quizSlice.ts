@@ -8,7 +8,6 @@ interface QuizState {
   currentQuestion: number;
   answers: QuizAnswer[];
   selectedDifficulty?: QuestionDifficulty;
-  selectedAmount: number;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
@@ -18,7 +17,6 @@ const initialState: QuizState = {
   currentQuestion: 0,
   answers: [],
   selectedDifficulty: undefined,
-  selectedAmount: 5,
   status: 'idle',
   error: null,
 };
@@ -36,9 +34,6 @@ const quizSlice = createSlice({
   reducers: {
     selectDifficulty: (state, action: PayloadAction<QuestionDifficulty | undefined>) => {
       state.selectedDifficulty = action.payload;
-    },
-    selectAmount: (state, action: PayloadAction<number>) => {
-      state.selectedAmount = action.payload;
     },
     setAnswer: (state, action: PayloadAction<QuizAnswer>) => {
       const existingAnswerIndex = state.answers.findIndex(
@@ -94,7 +89,6 @@ const quizSlice = createSlice({
 
 export const {
   selectDifficulty,
-  selectAmount,
   setAnswer,
   nextQuestion,
   previousQuestion,
@@ -108,7 +102,6 @@ export const selectQuizStatus = (state: RootState) => state.quiz.status;
 export const selectQuizError = (state: RootState) => state.quiz.error;
 export const selectQuizAnswers = (state: RootState) => state.quiz.answers;
 export const selectSelectedDifficulty = (state: RootState) => state.quiz.selectedDifficulty;
-export const selectSelectedAmount = (state: RootState) => state.quiz.selectedAmount;
 export const selectQuizComplete = (state: RootState) => 
   state.quiz.answers.length === state.quiz.questions.length && state.quiz.questions.length > 0;
 export const selectCurrentQuestionData = (state: RootState) => 

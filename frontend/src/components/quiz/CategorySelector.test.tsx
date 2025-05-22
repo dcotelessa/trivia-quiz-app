@@ -1,4 +1,3 @@
-// src/components/quiz/CategorySelector.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import CategorySelector from './CategorySelector';
 import { useCategories } from '../../hooks/useGraphQL';

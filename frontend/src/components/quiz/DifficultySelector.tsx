@@ -15,15 +15,14 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   const dispatch = useAppDispatch();
   const storeSelectedDifficulty = useAppSelector(selectSelectedDifficulty);
   
-  // Use props if provided, otherwise use Redux state
   const isControlled = onChange !== undefined;
   const selectedDifficulty = isControlled ? propSelectedDifficulty : storeSelectedDifficulty;
 
-  const difficulties: { value: QuestionDifficulty | ''; label: string }[] = [
-    { value: '', label: 'Any Difficulty' },
-    { value: 'easy', label: 'Easy' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'hard', label: 'Hard' }
+  const difficulties: { value: QuestionDifficulty | ''; label: string; description: string }[] = [
+    { value: '', label: 'Any Difficulty', description: 'Mix of easy, medium, and hard questions' },
+    { value: 'easy', label: 'Easy', description: 'Simple questions for beginners' },
+    { value: 'medium', label: 'Medium', description: 'Moderate difficulty questions' },
+    { value: 'hard', label: 'Hard', description: 'Challenging questions for experts' }
   ];
 
   const handleDifficultyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -37,14 +36,17 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
     }
   };
 
+  const selectedOption = difficulties.find(d => d.value === (selectedDifficulty || ''));
+
   return (
     <div className="form-group">
-      <label htmlFor="difficulty-select">Select Difficulty:</label>
+      <label htmlFor="difficulty-select">Difficulty:</label>
       <select
         id="difficulty-select"
         value={selectedDifficulty || ''}
         onChange={handleDifficultyChange}
         className="form-control"
+        aria-describedby="difficulty-help"
       >
         {difficulties.map((difficulty) => (
           <option key={difficulty.value} value={difficulty.value}>
@@ -52,6 +54,9 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
           </option>
         ))}
       </select>
+      <span id="difficulty-help" className="form-help">
+        {selectedOption?.description || 'Select your preferred difficulty level'}
+      </span>
     </div>
   );
 };

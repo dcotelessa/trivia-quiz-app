@@ -29,6 +29,14 @@ const QuestionCard: React.FC = () => {
     }));
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent, answer: string) => {
+    // Handle Enter and Space key presses for accessibility
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleSelectAnswer(answer);
+    }
+  };
+
   const handleNext = () => {
     dispatch(nextQuestion());
   };
@@ -49,27 +57,35 @@ const QuestionCard: React.FC = () => {
       </div>
       
       <div className="question-body">
-        <h4 className="question-text">
+        <h4 className="question-text" id={`question-${currentQuestion.id}`}>
           {decodeHtmlEntities(currentQuestion.question)}
         </h4>
         
-        <div className="answer-options">
+        <div 
+          className="answer-options-grid"
+          role="radiogroup"
+          aria-labelledby={`question-${currentQuestion.id}`}
+        >
           {currentQuestion.answers.map((answer, index) => (
             <div 
-              key={index} 
-              className={`answer-option ${selectedAnswer === answer ? 'selected' : ''}`}
+              key={index}
+              className={`answer-option-card ${selectedAnswer === answer ? 'selected' : ''}`}
               onClick={() => handleSelectAnswer(answer)}
+              onKeyDown={(e) => handleKeyDown(e, answer)}
+              tabIndex={0}
+              role="radio"
+              aria-checked={selectedAnswer === answer}
+              aria-label={`Option ${String.fromCharCode(65 + index)}: ${decodeHtmlEntities(answer)}`}
+              data-testid={`answer-option-${index}`}
             >
-              <input 
-                type="radio" 
-                id={`answer-${index}`}
-                name="answer"
-                checked={selectedAnswer === answer}
-                onChange={() => handleSelectAnswer(answer)}
-              />
-              <label htmlFor={`answer-${index}`}>
-                {decodeHtmlEntities(answer)}
-              </label>
+              <div className="answer-content">
+                <span className="answer-letter" aria-hidden="true">
+                  {String.fromCharCode(65 + index)}.
+                </span>
+                <span className="answer-text">
+                  {decodeHtmlEntities(answer)}
+                </span>
+              </div>
             </div>
           ))}
         </div>
@@ -80,6 +96,7 @@ const QuestionCard: React.FC = () => {
           className="btn btn-secondary"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
+          aria-label="Go to previous question"
         >
           Previous
         </button>
@@ -88,6 +105,7 @@ const QuestionCard: React.FC = () => {
           className="btn btn-primary"
           onClick={handleNext}
           disabled={currentQuestionIndex === questions.length - 1 || !selectedAnswer}
+          aria-label="Go to next question"
         >
           Next
         </button>

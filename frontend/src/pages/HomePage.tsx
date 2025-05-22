@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import CategorySelector from '../components/quiz/CategorySelector';
 import DifficultySelector from '../components/quiz/DifficultySelector';
-import AmountSelector from '../components/quiz/AmountSelector';
 import { 
   fetchQuizQuestions, 
-  selectSelectedAmount, 
   selectSelectedDifficulty 
 } from '../features/quiz/quizSlice';
 
@@ -15,42 +13,55 @@ const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
   const selectedDifficulty = useAppSelector(selectSelectedDifficulty);
-  const selectedAmount = useAppSelector(selectSelectedAmount);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleStartQuiz = async () => {
-    await dispatch(fetchQuizQuestions({
-      category: selectedCategory,
-      difficulty: selectedDifficulty,
-      amount: selectedAmount
-    }));
-    
-    navigate('/quiz');
+    setIsLoading(true);
+    try {
+      await dispatch(fetchQuizQuestions({
+        category: selectedCategory,
+        difficulty: selectedDifficulty,
+        amount: 5 // Fixed amount of 5 questions
+      }));
+      
+      navigate('/quiz');
+    } catch (error) {
+      console.error('Failed to start quiz:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="home-page">
       <div className="intro-section">
-        <h2>Trivia Quiz</h2>
-        <p>Answer trivia questions from various categories.</p>
+        <h2>Test Your Knowledge</h2>
+        <p>Choose your category and difficulty level to start your trivia challenge.</p>
       </div>
       
       <div className="quiz-options">
-        <h3>Quiz Options</h3>
+        <h3>Quiz Configuration</h3>
         <div className="form-container">
-          <CategorySelector 
-            selectedCategory={selectedCategory} 
-            onChange={setSelectedCategory} 
-          />
-          <DifficultySelector />
-          <AmountSelector />
+          <div className="selection-row">
+            <CategorySelector 
+              selectedCategory={selectedCategory} 
+              onChange={setSelectedCategory} 
+            />
+            <DifficultySelector />
+          </div>
           
           <div className="form-actions">
             <button 
               className="btn btn-primary btn-lg"
               onClick={handleStartQuiz}
+              disabled={isLoading}
+              aria-describedby="quiz-info"
             >
-              Start Quiz
+              {isLoading ? 'Loading...' : 'Start Quiz'}
             </button>
+            <p id="quiz-info" className="quiz-info">
+              You will answer 5 questions based on your selected preferences.
+            </p>
           </div>
         </div>
       </div>
